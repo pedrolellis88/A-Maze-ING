@@ -107,7 +107,9 @@ def _count_edges_undirected(maze: Maze, blocked: set[Point]) -> int:
 
 
 def _parse_hex_grid_and_tail(content: str) -> tuple[list[str], str, str, str]:
-    """Return (grid_lines, entry_line, exit_line, path_line) from output text.""" # noqa
+    """Return (grid_lines, entry_line, exit_line, path_line) from output text.
+    Look page 10/18 of the subject
+    """
     lines = content.splitlines()
     sep: int | None = None
     for i, line in enumerate(lines):

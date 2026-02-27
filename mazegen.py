@@ -208,8 +208,8 @@ class MazeGenerator:
         out: list[tuple[Direction, Point]] = []
         for d, (dx, dy) in DIR_TO_DELTA.items():
             np = Point(p.x + dx, p.y + dy)
-        if maze.in_bounds(np):
-            out.append((d, np))
+            if maze.in_bounds(np):
+                out.append((d, np))
         return out
 
     def _carve_perfect_backtracker(self, maze: Maze) -> None:
@@ -219,7 +219,7 @@ class MazeGenerator:
         """
         visited = [[False for _ in range(maze.width)] for __ in range(maze.height)] # noqa
 
-        start = maze.entry  # começar na entry é ótimo pra avaliação
+        start = maze.entry
         stack: list[Point] = [start]
         visited[start.y][start.x] = True
 
@@ -235,10 +235,10 @@ class MazeGenerator:
                 stack.pop()
                 continue
 
-        d, nxt = self.rng.choice(candidates)
-        self._open_wall(maze, current, d)
-        visited[nxt.y][nxt.x] = True
-        stack.append(nxt)
+            d, nxt = self.rng.choice(candidates)
+            self._open_wall(maze, current, d)
+            visited[nxt.y][nxt.x] = True
+            stack.append(nxt)
 
 
 def _parse_kv_config(text: str) -> dict[str, str]:

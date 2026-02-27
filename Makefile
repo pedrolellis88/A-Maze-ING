@@ -36,6 +36,7 @@ help:
 	@printf "  clean      Remove caches/build artifacts\n"
 	@printf "  distclean  clean + remove $(VENV_DIR)\n"
 	@printf "  build      Build pip package (mazegen-*)\n"
+	@printf "  nuke       Clean eveything that doesn't come in the root of the repo\n"
 
 venv:
 	@printf "$(INFO) Creating virtualenv in '$(VENV_DIR)'\n"

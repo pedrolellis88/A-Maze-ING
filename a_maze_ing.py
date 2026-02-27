@@ -46,7 +46,6 @@ def main(argv: list[str] | None = None) -> int:
         print(f"Error: generation failed: {e}")
         return 1
     except Exception as e:
-        # Fail-safe: subject pede que não crashe inesperadamente
         print(f"Error: unexpected failure: {e}")
         return 1
 

@@ -3,50 +3,48 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import IntEnum
 from pathlib import Path
-from typing import Iterable
 import random
-from collections import deque
 
 
 class MazeConfigError(ValueError):
-    pass
+    """Raised when the maze configuration is invalid or malformed."""
 
 
 class MazeGenerationError(RuntimeError):
-    pass
+    """Raised when maze generation or solving fails."""
 
 
 class Direction(IntEnum):
+    """Cardinal directions used to navigate the maze grid."""
+
     NORTH = 0
     EAST = 1
     SOUTH = 2
     WEST = 3
 
 
-# Bits no output (subject):
-# bit 0 North, bit 1 East, bit 2 South, bit 3 West :contentReference[oaicite:4]{index=4}
-DIR_TO_BIT = {
+DIR_TO_BIT: dict[Direction, int] = {
     Direction.NORTH: 0,
     Direction.EAST: 1,
     Direction.SOUTH: 2,
     Direction.WEST: 3,
 }
 
-DIR_TO_DELTA = {
+DIR_TO_DELTA: dict[Direction, tuple[int, int]] = {
     Direction.NORTH: (0, -1),
     Direction.EAST: (1, 0),
     Direction.SOUTH: (0, 1),
     Direction.WEST: (-1, 0),
 }
 
-OPPOSITE = {
+OPPOSITE: dict[Direction, Direction] = {
     Direction.NORTH: Direction.SOUTH,
     Direction.EAST: Direction.WEST,
     Direction.SOUTH: Direction.NORTH,
     Direction.WEST: Direction.EAST,
 }
 
-DIR_TO_LETTER = {
+DIR_TO_LETTER: dict[Direction, str] = {
     Direction.NORTH: "N",
     Direction.EAST: "E",
     Direction.SOUTH: "S",
@@ -54,14 +52,18 @@ DIR_TO_LETTER = {
 }
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class Point:
+    """2D coordinate on the maze grid (x, y)."""
+
     x: int
     y: int
 
 
-@dataclass
+@dataclass(slots=True)
 class MazeConfig:
+    """Configuration for maze generation and output."""
+
     width: int
     height: int
     entry: Point
@@ -72,6 +74,7 @@ class MazeConfig:
 
     @staticmethod
     def from_file(path: Path) -> "MazeConfig":
+        """Load a MazeConfig from a KEY=VALUE config file."""
         text = path.read_text(encoding="utf-8")
         kv = _parse_kv_config(text)
 
@@ -82,7 +85,7 @@ class MazeConfig:
         output_file = Path(_parse_str_required(kv, "OUTPUT_FILE"))
         perfect = _parse_bool_required(kv, "PERFECT")
 
-        seed = None
+        seed: int | None = None
         if "SEED" in kv:
             seed = _parse_int(kv["SEED"], "SEED")
 
@@ -99,14 +102,17 @@ class MazeConfig:
         return cfg
 
 
-@dataclass
+@dataclass(slots=True)
 class Cell:
-    # walls bits: 1 means CLOSED, 0 means OPEN
-    walls: int = 0b1111  # começa tudo fechado por padrão
+    """A single maze cell encoded as a 4-bit wall mask (WSEN)."""
+
+    walls: int = 0b1111
 
 
-@dataclass
+@dataclass(slots=True)
 class Maze:
+    """Maze grid and metadata (dimensions, entry, exit)."""
+
     width: int
     height: int
     entry: Point
@@ -114,50 +120,56 @@ class Maze:
     grid: list[list[Cell]]
 
     def in_bounds(self, p: Point) -> bool:
+        """Return True if point p is inside the maze boundaries."""
         return 0 <= p.x < self.width and 0 <= p.y < self.height
 
     def cell(self, p: Point) -> Cell:
+        """Return the Cell at position p (assumes p is in bounds)."""
         return self.grid[p.y][p.x]
 
 
 class MazeGenerator:
+    """Generate mazes and compute shortest paths based on MazeConfig."""
+
     def __init__(self, config: MazeConfig) -> None:
+        """Create a generator with a reproducible RNG from config.seed."""
         self.cfg = config
         self.rng = random.Random(config.seed)
+        self._maze: Maze | None = None
 
     def generate(self) -> Maze:
-        # Placeholder: estrutura inicial coerente (bordas fechadas).
-        # Depois você troca por algoritmo (recursive backtracker / prim / kruskal etc.)
+        """Generate and return a new maze instance."""
         maze = Maze(
             width=self.cfg.width,
             height=self.cfg.height,
             entry=self.cfg.entry,
             exit=self.cfg.exit,
-            grid=[[Cell() for _ in range(self.cfg.width)] for __ in range(self.cfg.height)],
+            grid=[
+                [Cell() for _ in range(self.cfg.width)]
+                for __ in range(self.cfg.height)
+            ],
         )
 
         self._ensure_outer_borders_closed(maze)
-
-        # Aqui entra:
-        # - algoritmo de carving garantindo conectividade
-        # - se perfect=True: gerar spanning tree (um único caminho entre entry e exit) :contentReference[oaicite:5]{index=5}
-        # - aplicar padrão "42" com células totalmente fechadas quando couber :contentReference[oaicite:6]{index=6}
-        #
-        # Por enquanto, falha clara para não “passar falso positivo”.
-        raise MazeGenerationError("generate() not implemented yet (algorithm missing)")
+        self._maze = maze
+        raise MazeGenerationError("generate() not implemented yet (algorithm missing)") # noqa
 
     def solve_shortest_path(self) -> str:
-        # Depende de generate() ter sido feito e armazenado.
-        raise MazeGenerationError("solve_shortest_path() requires a generated maze")
-
-    # --------- IO do formato do subject ---------
+        """Solve and return a shortest path string (e.g. 'NNEESW')."""
+        if self._maze is None:
+            raise MazeGenerationError("solve_shortest_path() requires a generated maze") # noqa
+        raise MazeGenerationError("solve_shortest_path() not implemented yet")
 
     def write_output_file(self, maze: Maze, path: str) -> None:
+        """Write maze walls (hex), entry/exit, and the path to output_file."""
         lines: list[str] = []
         for y in range(maze.height):
-            row_hex = "".join(_cell_to_hex(maze.grid[y][x]) for x in range(maze.width))
+            row_hex = "".join(
+                _cell_to_hex(maze.grid[y][x]) for x in range(maze.width)
+            )
             lines.append(row_hex)
-        lines.append("")  # empty line
+
+        lines.append("")
         lines.append(f"{maze.entry.x},{maze.entry.y}")
         lines.append(f"{maze.exit.x},{maze.exit.y}")
         lines.append(path)
@@ -165,26 +177,20 @@ class MazeGenerator:
         content = "\n".join(lines) + "\n"
         self.cfg.output_file.write_text(content, encoding="utf-8")
 
-    # --------- Render (placeholder) ---------
-
-    def render_ascii(self, maze: Maze, show_path: bool, path: str | None) -> str:
-        # Placeholder minimalista: depois você faz o renderer de verdade
-        return f"Maze {maze.width}x{maze.height} entry={maze.entry} exit={maze.exit}"
-
-    # --------- Helpers internos ---------
+    def render_ascii(self, maze: Maze, show_path: bool, path: str | None) -> str: # noqa
+        """Render the maze as an ASCII string (stub placeholder)."""
+        _ = (show_path, path)
+        return f"Maze {maze.width}x{maze.height} entry={maze.entry} exit={maze.exit}" # noqa
 
     def _ensure_outer_borders_closed(self, maze: Maze) -> None:
-        # Por padrão já iniciamos walls=1111, então bordas já fechadas.
-        # Se você começar com paredes abertas, use isso aqui.
-        pass
+        """Ensure boundary walls remain closed for all outer cells (stub)."""
+        _ = maze
+        return
 
     def _open_wall(self, maze: Maze, p: Point, d: Direction) -> None:
-        """
-        Abre parede em (p) na direção d e abre a parede oposta no vizinho.
-        Isso garante coerência entre células adjacentes. :contentReference[oaicite:7]{index=7}
-        """
-        nx, ny = p.x + DIR_TO_DELTA[d][0], p.y + DIR_TO_DELTA[d][1]
-        np = Point(nx, ny)
+        """Open wall at cell p in direction d and open opposite wall in neighbor.""" # noqa
+        dx, dy = DIR_TO_DELTA[d]
+        np = Point(p.x + dx, p.y + dy)
         if not maze.in_bounds(np):
             return
 
@@ -195,9 +201,8 @@ class MazeGenerator:
         neigh.walls &= ~(1 << DIR_TO_BIT[OPPOSITE[d]])
 
 
-# ---------------- Parsing helpers ----------------
-
 def _parse_kv_config(text: str) -> dict[str, str]:
+    """Parse a KEY=VALUE config string into a dict (ignores blanks/comments).""" # noqa
     kv: dict[str, str] = {}
     for raw in text.splitlines():
         line = raw.strip()
@@ -215,6 +220,7 @@ def _parse_kv_config(text: str) -> dict[str, str]:
 
 
 def _parse_str_required(kv: dict[str, str], key: str) -> str:
+    """Return required string value for key or raise MazeConfigError."""
     if key not in kv:
         raise MazeConfigError(f"Missing required key: {key}")
     if not kv[key]:
@@ -223,17 +229,22 @@ def _parse_str_required(kv: dict[str, str], key: str) -> str:
 
 
 def _parse_int_required(kv: dict[str, str], key: str) -> int:
+    """Return required integer value for key or raise MazeConfigError."""
     return _parse_int(_parse_str_required(kv, key), key)
 
 
 def _parse_int(value: str, key: str) -> int:
+    """Parse an int or raise MazeConfigError with a clear message."""
     try:
         return int(value)
-    except ValueError as e:
-        raise MazeConfigError(f"{key} must be an integer, got {value!r}") from e
+    except ValueError as exc:
+        raise MazeConfigError(
+            f"{key} must be an integer, got {value!r}"
+        ) from exc
 
 
 def _parse_bool_required(kv: dict[str, str], key: str) -> bool:
+    """Return required boolean value for key (accepts common truthy/falsey tokens).""" # noqa
     raw = _parse_str_required(kv, key).lower()
     if raw in {"true", "1", "yes", "y"}:
         return True
@@ -243,6 +254,7 @@ def _parse_bool_required(kv: dict[str, str], key: str) -> bool:
 
 
 def _parse_point_required(kv: dict[str, str], key: str) -> Point:
+    """Parse a required 'x,y' point into a Point instance."""
     raw = _parse_str_required(kv, key)
     parts = [p.strip() for p in raw.split(",")]
     if len(parts) != 2:
@@ -253,6 +265,7 @@ def _parse_point_required(kv: dict[str, str], key: str) -> Point:
 
 
 def _validate_config(cfg: MazeConfig) -> None:
+    """Validate config semantic constraints (bounds, sizes, entry/exit)."""
     if cfg.width <= 0 or cfg.height <= 0:
         raise MazeConfigError("WIDTH and HEIGHT must be positive")
     if cfg.entry == cfg.exit:
@@ -264,9 +277,7 @@ def _validate_config(cfg: MazeConfig) -> None:
         raise MazeConfigError("EXIT out of bounds")
 
 
-# ---------------- Hex encoding ----------------
-
 def _cell_to_hex(cell: Cell) -> str:
-    # walls bits are in 0..3, convert to 0..15 and then to hex digit
+    """Convert a Cell's 4-bit wall mask into a single hex digit (0..F)."""
     v = cell.walls & 0xF
     return format(v, "X")

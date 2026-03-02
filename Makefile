@@ -111,9 +111,17 @@ build: install
 
 nuke: distclean
 	@printf "$(WARN) Removing EVERYTHING generated (builds, caches, outputs, logs)\n"
+
+	# build artifacts
 	@rm -rf dist build *.egg-info 2>/dev/null || true
+
+	# python caches
 	@rm -rf .mypy_cache .pytest_cache .ruff_cache 2>/dev/null || true
 	@find . -type d -name "__pycache__" -prune -exec rm -rf {} + 2>/dev/null || true
-	@rm -rf out 2>/dev/null || true
-	@rm -f maze.txt *.log 2>/dev/null || true
+
+	# generated outputs (recursively)
+	@find . -type d -name "out" -prune -exec rm -rf {} + 2>/dev/null || true
+	@find . -type f -name "maze.txt" -delete 2>/dev/null || true
+	@find . -type f -name "*.log" -delete 2>/dev/null || true
+
 	@printf "$(OK) Nuke complete (repo back to clean state)\n"

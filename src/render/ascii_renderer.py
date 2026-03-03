@@ -7,26 +7,26 @@ import mazegen
 
 from .palette import Palette
 
-# ---------- Internal markers (never shown directly) ----------
 WALL_MARK = "W"
 PATTERN42_MARK = "F"
 PATH_MARK = "P"
 ENTRY_MARK = "A"
 EXIT_MARK = "Z"
 
-# ---------- Output character (everything becomes this) ----------
 OUT_CHAR = "▒"
 
 
 @dataclass(frozen=True, slots=True)
 class RenderOptions:
+    """Options that control ASCII rendering (path + palette)."""
+
     show_path: bool = False
     path: Optional[str] = None
-
     palette: Palette = field(default_factory=Palette)
 
 
 def _has_wall(cell: mazegen.Cell, d: mazegen.Direction) -> bool:
+    """Return True if `cell` has a wall in direction `d`."""
     return bool(cell.walls & (1 << mazegen.DIR_TO_BIT[d]))
 
 
@@ -36,9 +36,7 @@ def _cell_center_coords(
     cell_size: int,
     wall_thickness: int,
 ) -> tuple[int, int]:
-    """
-    Return (cx, cy) in canvas coordinates for the center of the cell (x, y).
-    """
+    """Return (cx, cy) canvas coords for the center of cell (x, y)."""
     base_x = x * (cell_size + wall_thickness) + wall_thickness
     base_y = y * (cell_size + wall_thickness) + wall_thickness
     cx = base_x + cell_size // 2
@@ -54,9 +52,7 @@ def _draw_axis_aligned_segment(
     y1: int,
     mark: str,
 ) -> None:
-    """
-    Draw an orthogonal segment (same row OR same col) on the canvas.
-    """
+    """Draw an orthogonal segment on `canvas` from (x0,y0) to (x1,y1)."""
     if x0 == x1:
         step = 1 if y1 >= y0 else -1
         for y in range(y0, y1 + step, step):
@@ -69,7 +65,7 @@ def _draw_axis_aligned_segment(
             canvas[y0][x] = mark
         return
 
-    # Unexpected: mark endpoints only (safe fallback)
+    # Fallback: mark endpoints only (shouldn't happen).
     canvas[y0][x0] = mark
     canvas[y1][x1] = mark
 
@@ -82,10 +78,7 @@ def _overlay_path_as_single_line(
     wall_thickness: int,
     mark: str = PATH_MARK,
 ) -> None:
-    """
-    Draw a continuous path line from entry to exit, connecting the centers
-    of cells along the given path string (N/S/E/W).
-    """
+    """Overlay a continuous line following `path` from entry to exit."""
     p = maze.entry
     cx0, cy0 = _cell_center_coords(p.x, p.y, cell_size, wall_thickness)
     canvas[cy0][cx0] = mark
@@ -104,7 +97,6 @@ def _overlay_path_as_single_line(
 
         dx, dy = mazegen.DIR_TO_DELTA[d]
         nxt = mazegen.Point(p.x + dx, p.y + dy)
-
         if not maze.in_bounds(nxt):
             continue
 
@@ -116,6 +108,7 @@ def _overlay_path_as_single_line(
 
 
 def render_ascii(maze: mazegen.Maze, opts: RenderOptions | None = None) -> str:
+    """Render `maze` to colored ASCII using `opts` (optionally with path)."""
     if opts is None:
         opts = RenderOptions()
 
@@ -130,10 +123,10 @@ def render_ascii(maze: mazegen.Maze, opts: RenderOptions | None = None) -> str:
     canvas_w = width * cell_size + (width + 1) * wall_thickness
     canvas_h = height * cell_size + (height + 1) * wall_thickness
 
-    # Start filled with "walls"
+    # Start filled with "walls" (internal mark).
     canvas = [[WALL_MARK for _ in range(canvas_w)] for _ in range(canvas_h)]
 
-    # 1) Draw maze interior + open passages
+    # 1) Draw maze interior + open passages.
     for y in range(height):
         for x in range(width):
             cell = maze.grid[y][x]
@@ -143,13 +136,13 @@ def render_ascii(maze: mazegen.Maze, opts: RenderOptions | None = None) -> str:
 
             is_42 = cell.walls == 0b1111
 
-            # Fill cell interior
+            # Fill cell interior with either pattern marker or space.
             fill_mark = PATTERN42_MARK if is_42 else " "
             for dy in range(cell_size):
                 for dx in range(cell_size):
                     canvas[base_y + dy][base_x + dx] = fill_mark
 
-            # Open walls where passages exist
+            # Open walls where passages exist.
             if not _has_wall(cell, mazegen.Direction.NORTH):
                 for dx in range(cell_size):
                     canvas[base_y - 1][base_x + dx] = " "
@@ -166,7 +159,7 @@ def render_ascii(maze: mazegen.Maze, opts: RenderOptions | None = None) -> str:
                 for dy in range(cell_size):
                     canvas[base_y + dy][base_x + cell_size] = " "
 
-    # 2) Overlay continuous path (internal mark)
+    # 2) Overlay continuous path (internal mark).
     if opts.show_path and opts.path:
         _overlay_path_as_single_line(
             canvas=canvas,
@@ -177,18 +170,17 @@ def render_ascii(maze: mazegen.Maze, opts: RenderOptions | None = None) -> str:
             mark=PATH_MARK,
         )
 
-    # 3) Overlay entry/exit (internal marks)
+    # 3) Overlay entry/exit marks.
     entry_cx, entry_cy = _cell_center_coords(
         maze.entry.x, maze.entry.y, cell_size, wall_thickness
     )
     exit_cx, exit_cy = _cell_center_coords(
         maze.exit.x, maze.exit.y, cell_size, wall_thickness
     )
-
     canvas[entry_cy][entry_cx] = ENTRY_MARK
     canvas[exit_cy][exit_cx] = EXIT_MARK
 
-    # 4) Apply colors: print OUT_CHAR for everything, but color by mark
+    # 4) Colorize: print OUT_CHAR for marks, preserving spaces.
     lines: list[str] = []
     for row in canvas:
         line = ""
@@ -200,11 +192,10 @@ def render_ascii(maze: mazegen.Maze, opts: RenderOptions | None = None) -> str:
             elif mark == PATH_MARK:
                 line += palette.apply(OUT_CHAR, palette.path)
             elif mark == ENTRY_MARK:
-                line += palette.apply(OUT_CHAR, palette.entry)  # red
+                line += palette.apply(OUT_CHAR, palette.entry)
             elif mark == EXIT_MARK:
-                line += palette.apply(OUT_CHAR, palette.exit)  # green
+                line += palette.apply(OUT_CHAR, palette.exit)
             else:
-                # spaces (and any other non-mark char)
                 line += mark
         lines.append(line)
 

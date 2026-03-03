@@ -12,6 +12,10 @@ from .render.ascii_renderer import RenderOptions, render_ascii
 
 @dataclass(frozen=True, slots=True)
 class RunResult:
+    """
+    Represents the result of a full maze execution run.
+    """
+
     maze: mazegen.Maze
     path: str
     output_file: Path
@@ -19,21 +23,37 @@ class RunResult:
 
 
 def run(app_cfg: AppConfig) -> RunResult:
+    """
+    Executes the full maze pipeline:
+    configuration loading, generation, solving, file output,
+    and optional ASCII rendering.
+    """
+
+    # Load maze configuration
     cfg = mazegen.MazeConfig.from_file(app_cfg.config_path)
 
-    gen = mazegen.MazeGenerator(cfg)
-    maze = gen.generate()
+    # Generate maze
+    generator = mazegen.MazeGenerator(cfg)
+    maze = generator.generate()
 
-    path = gen.solve_shortest_path()
+    # Solve shortest path
+    path = generator.solve_shortest_path()
 
-    gen.write_output_file(maze, path)
+    # Write output file
+    generator.write_output_file(maze, path)
 
     rendered: Optional[str] = None
+
+    # Optional ASCII rendering
     if app_cfg.render_mode == RenderMode.ASCII:
         rendered = render_ascii(
             maze,
-            RenderOptions(show_path=app_cfg.show_path, path=path),
+            RenderOptions(
+                show_path=app_cfg.show_path,
+                path=path,
+            ),
         )
+
         if app_cfg.print_to_stdout:
             print(rendered)
 

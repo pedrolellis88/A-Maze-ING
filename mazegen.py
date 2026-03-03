@@ -7,10 +7,6 @@ from pathlib import Path
 import random
 
 
-# ============================================================
-# Errors
-# ============================================================
-
 class MazeConfigError(ValueError):
     """Raised when the maze configuration is invalid or malformed."""
 
@@ -18,10 +14,6 @@ class MazeConfigError(ValueError):
 class MazeGenerationError(RuntimeError):
     """Raised when maze generation or solving fails."""
 
-
-# ============================================================
-# Core types
-# ============================================================
 
 class Direction(IntEnum):
     """Cardinal directions used to navigate the maze grid."""
@@ -157,10 +149,6 @@ class Maze:
         return self.grid[p.y][p.x]
 
 
-# ============================================================
-# Helpers
-# ============================================================
-
 FULLY_CLOSED = 0b1111
 
 
@@ -214,15 +202,6 @@ def _cell_to_hex(cell: Cell) -> str:
     return format(cell.walls & 0xF, "X")
 
 
-# ============================================================
-# 42 pattern (fully closed cells)
-# ============================================================
-
-# Compact bitmap that visually reads as "42" when rendered:
-# X = fully closed cell
-# . = normal cell
-#
-# Width 9, height 5
 _42_BITMAP: list[str] = [
     "X...XXX",
     "X.....X",
@@ -288,10 +267,6 @@ def _is_unblocked_connected(
 
     return len(seen) == total_open
 
-
-# ============================================================
-# Generator + solver
-# ============================================================
 
 class MazeGenerator:
     """
@@ -379,10 +354,6 @@ class MazeGenerator:
 
         self.cfg.output_file.write_text("\n".join(lines) + "\n", encoding="utf-8") # noqa
 
-    # -----------------------
-    # Internal: generation
-    # -----------------------
-
     def _carve_perfect_backtracker(self, maze: Maze) -> None:
         """
         Generate a spanning tree over the grid excluding blocked cells
@@ -429,10 +400,6 @@ class MazeGenerator:
             raise MazeGenerationError(
                 "Generation failed: not all non-blocked cells are connected"
             )
-
-    # -----------------------
-    # Internal: BFS solver
-    # -----------------------
 
     def _open_between(self, maze: Maze, a: Point, d: Direction) -> bool:
         """Return True if there is a passage from a to its neighbor in direction d.""" # noqa
@@ -488,10 +455,6 @@ class MazeGenerator:
         letters.reverse()
         return "".join(letters)
 
-
-# ============================================================
-# Config parsing
-# ============================================================
 
 def _parse_kv_config(text: str) -> dict[str, str]:
     """Parse a KEY=VALUE config string into a dict (ignores blanks/comments).""" # noqa

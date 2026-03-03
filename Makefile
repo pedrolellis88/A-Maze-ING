@@ -42,7 +42,7 @@ venv:
 	@printf "$(INFO) Creating virtualenv in '$(VENV_DIR)'\n"
 	@$(PY) -m venv $(VENV_DIR)
 	@printf "$(INFO) Upgrading pip/setuptools/wheel\n"
-	@$(PIP) install --upgrade pip setuptools wheel >/dev/null
+	@$(PIP) install --upgrade pip setuptools wheel build
 	@printf "$(OK) Virtualenv ready\n"
 
 install: venv

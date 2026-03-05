@@ -2,7 +2,7 @@
 
 # A-Maze-ing
 
-![Maze rendering](assets/maze_example.png)
+![Maze rendering](maze_example.png)
 
 ## Description
 

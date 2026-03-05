@@ -87,6 +87,7 @@ class MazeConfig:
     perfect: bool
     seed: int
     pattern_42: bool = True
+    colors: str | None = None
 
     @staticmethod
     def from_file(path: Path) -> "MazeConfig":
@@ -109,6 +110,12 @@ class MazeConfig:
         if "PATTERN_42" in kv:
             pattern_42 = _parse_bool_required(kv, "PATTERN_42")
 
+        colors = None
+        if "COLORS" in kv:
+            colors = kv["COLORS"].strip()
+            if not colors:
+                raise MazeConfigError("COLORS cannot be empty (expected KEY:VALUE pairs).") # noqa    
+
         cfg = MazeConfig(
             width=width,
             height=height,
@@ -118,6 +125,7 @@ class MazeConfig:
             perfect=perfect,
             seed=seed,
             pattern_42=pattern_42,
+            colors=colors,
         )
         _validate_config(cfg)
         return cfg

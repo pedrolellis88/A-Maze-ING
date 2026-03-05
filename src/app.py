@@ -4,6 +4,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
 
+from .render.palette import palette_from_spec
+
 import mazegen
 
 from .model import AppConfig, RenderMode
@@ -46,11 +48,14 @@ def run(app_cfg: AppConfig) -> RunResult:
 
     # Optional ASCII rendering
     if app_cfg.render_mode == RenderMode.ASCII:
+        palette = palette_from_spec(cfg.colors)
+
         rendered = render_ascii(
             maze,
             RenderOptions(
                 show_path=app_cfg.show_path,
                 path=path,
+                palette=palette,
             ),
         )
 

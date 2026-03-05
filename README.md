@@ -2,6 +2,8 @@
 
 # A-Maze-ing
 
+![Maze rendering](assets/maze_example.png)
+
 ## Description
 
 **A-Maze-ing** is a Python project that generates mazes from a configuration file, outputs them in a structured hexadecimal representation, and provides a visual representation of the generated maze.

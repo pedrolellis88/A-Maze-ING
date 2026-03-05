@@ -147,6 +147,9 @@ ENTRY=0,0
 OUTPUT_FILE=maze.txt
 PERFECT=TRUE
 EXIT=29,9
+SEED=20
+COLOR=TRUE
+COLORS=WALL:WHITE,PATH:BLUE,ENTRY:GREEN,EXIT:RED,PATTERN_42:MAGENTA
 ```
 
 ### Mandatory keys
@@ -161,6 +164,14 @@ EXIT=29,9
 | PERFECT | Indicates whether the maze must be perfect |
 
 A **perfect maze** contains exactly one valid path between the entry and the exit. :contentReference[oaicite:2]{index=2}
+
+### Optional keys
+
+| Key | Description |
+|-----|-------------|
+| SEED | To generate always the same maze (default=0) |
+| COLORS | Used to change the colors of the maze (default=True)|
+Example: COLORS=WALL:WHITE,PATH:BLUE,ENTRY:GREEN,EXIT:RED,PATTERN_42:MAGENTA
 
 ---
 

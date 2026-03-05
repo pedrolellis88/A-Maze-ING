@@ -6,13 +6,11 @@
 
 ## Description
 
-**A-Maze-ing** is a Python project that generates mazes from a configuration file, outputs them in a structured hexadecimal representation, and provides a visual representation of the generated maze.
+**A-Maze-ing** is a Python project that generates mazes from a configuration file, exports them using a hexadecimal wall representation, and provides a visual representation of the generated maze.
 
 The program reads a configuration file defining maze parameters (size, entry/exit coordinates, output file, and generation options), generates a valid maze, and writes it to an output file. Each maze cell is encoded using a hexadecimal value that represents the presence of walls on its four sides.
 
-The project also includes a reusable maze generation module designed to be packaged and installed as a Python package (`mazegen-*`). This allows the generation logic to be reused in other applications.
-
-The project follows the technical requirements defined in the official project subject. :contentReference[oaicite:0]{index=0}
+The project also includes a reusable maze generation module that can be packaged and installed as a Python package (`mazegen-*`). This allows the maze generation logic to be reused in future projects.
 
 Key objectives of the project include:
 
@@ -34,7 +32,7 @@ The project requires:
 - Python **3.10 or later**
 - flake8
 - mypy
-- build tools
+- Python build tools
 
 Dependencies are listed in:
 
@@ -52,13 +50,13 @@ Create the virtual environment and install dependencies:
 make install
 ```
 
-This command installs the required dependencies for the project.
+This command installs all required dependencies for the project.
 
 ---
 
 ## Run the program
 
-The project must be executed using the following command:
+The program must be executed using:
 
 ```bash
 python3 a_maze_ing.py config.txt
@@ -66,8 +64,8 @@ python3 a_maze_ing.py config.txt
 
 Where:
 
-- `a_maze_ing.py` is the main program file.
-- `config_default.txt` is the configuration file defining the maze parameters. :contentReference[oaicite:1]{index=1}
+- `a_maze_ing.py` is the main program file
+- `config.txt` is the configuration file defining the maze parameters
 
 Example using the default configuration:
 
@@ -122,13 +120,13 @@ make distclean
 
 ## Build the reusable module
 
-The maze generator can be packaged as a reusable Python package:
+The maze generator can be packaged as a reusable Python module:
 
 ```bash
 make build
 ```
 
-The resulting package will be placed in the `dist/` directory.
+The generated package will be placed inside the `dist/` directory.
 
 ---
 
@@ -152,7 +150,9 @@ COLOR=TRUE
 COLORS=WALL:WHITE,PATH:BLUE,ENTRY:GREEN,EXIT:RED,PATTERN_42:MAGENTA
 ```
 
-### Mandatory keys
+---
+
+## Mandatory keys
 
 | Key | Description |
 |-----|-------------|
@@ -163,15 +163,22 @@ COLORS=WALL:WHITE,PATH:BLUE,ENTRY:GREEN,EXIT:RED,PATTERN_42:MAGENTA
 | OUTPUT_FILE | Output filename |
 | PERFECT | Indicates whether the maze must be perfect |
 
-A **perfect maze** contains exactly one valid path between the entry and the exit. :contentReference[oaicite:2]{index=2}
+A **perfect maze** contains exactly one valid path between the entry and the exit.
 
-### Optional keys
+---
+
+## Optional keys
 
 | Key | Description |
 |-----|-------------|
-| SEED | To generate always the same maze (default=0) |
-| COLORS | Used to change the colors of the maze (default=True)|
-Example: COLORS=WALL:WHITE,PATH:BLUE,ENTRY:GREEN,EXIT:RED,PATTERN_42:MAGENTA
+| SEED | Allows deterministic generation of the maze (default = 0) |
+| COLORS | Customizes maze colors (default = True) |
+
+Example:
+
+```
+COLORS=WALL:WHITE,PATH:BLUE,ENTRY:GREEN,EXIT:RED,PATTERN_42:MAGENTA
+```
 
 ---
 
@@ -195,29 +202,29 @@ Example values:
 A  -> 1010
 ```
 
-Cells are written row by row, one row per line.
+Cells are stored row by row, with **one row per line**.
 
 After the maze grid, the file contains:
 
-1. Entry coordinates
-2. Exit coordinates
+1. Entry coordinates  
+2. Exit coordinates  
 3. The shortest path between them using the letters `N`, `E`, `S`, `W`
 
-All lines end with `\n`. :contentReference[oaicite:3]{index=3}
+All lines end with `\n`.
 
 ---
 
 # Maze Generation Algorithm
 
-The project generates a random maze structure ensuring that:
+The project generates a random maze while ensuring that:
 
 - Entry and exit exist and are valid
 - All cells remain connected
 - Neighboring cells maintain consistent walls
 - Corridors never exceed the allowed width constraints
-- The maze structure is coherent and valid
+- The maze structure remains coherent and valid
 
-When the `PERFECT` flag is enabled, the maze must contain exactly one valid path between entry and exit. :contentReference[oaicite:4]{index=4}
+When the `PERFECT` flag is enabled, the maze must contain **exactly one valid path** between entry and exit.
 
 ---
 
@@ -225,12 +232,12 @@ When the `PERFECT` flag is enabled, the maze must contain exactly one valid path
 
 The project includes a visual representation of the maze.
 
-This visualization can be implemented using:
+The visualization can be implemented using:
 
 - Terminal ASCII rendering
-- A graphical interface using MiniLibX (optional)
+- A graphical interface using **MiniLibX (optional)**
 
-The visual representation must clearly show:
+The visual representation clearly shows:
 
 - Maze walls
 - Entry point
@@ -242,31 +249,29 @@ Possible interactions include:
 - Regenerating a new maze
 - Showing or hiding the shortest path
 - Changing wall colours
-- Optionally displaying the “42” pattern inside the maze
-
-These requirements are defined in the project subject. :contentReference[oaicite:5]{index=5}
+- Optionally displaying the **“42” pattern** inside the maze
 
 ---
 
 # Reusable Module
 
-Maze generation logic must be implemented in a reusable module.
+Maze generation logic is implemented in a reusable module.
 
-The module provides a class responsible for generating mazes, typically named:
+The module provides a class responsible for generating mazes:
 
 ```
 MazeGenerator
 ```
 
-This module must be packaged as a Python package located at the root of the repository and installable using standard packaging tools.
+This module is packaged as a Python package located at the root of the repository and can be installed using standard Python packaging tools.
 
-The resulting file may look like:
+Example package output:
 
 ```
 mazegen-1.0.0-py3-none-any.whl
 ```
 
-This reusable module allows future projects to import and reuse the maze generation logic. :contentReference[oaicite:6]{index=6}
+This reusable module allows future projects to import and reuse the maze generation logic.
 
 ---
 
@@ -283,12 +288,12 @@ maze = generator.generate()
 solution = generator.solve()
 ```
 
-The module should allow:
+The module allows:
 
 - Instantiating a maze generator
 - Passing parameters such as size or seed
 - Accessing the generated maze structure
-- Accessing a valid solution path
+- Retrieving a valid solution path
 
 ---
 
@@ -302,6 +307,7 @@ A-Maze-ING-main
 ├── a_maze_ing.py
 ├── mazegen.py
 ├── config_default.txt
+├── maze_example.png
 ├── requirements.txt
 ├── pyproject.toml
 ├── Makefile
@@ -316,7 +322,9 @@ A-Maze-ING-main
 └── LICENSE
 ```
 
-Main components:
+---
+
+## Main components
 
 | File | Purpose |
 |-----|--------|
@@ -332,31 +340,30 @@ Main components:
 
 ## Roles
 
-Pendência — the repository does not contain:
+The repository currently does not include documentation specifying:
 
-- student names
-- 42 logins
-- team role distribution
+- Team member roles
+- Task distribution during development
 
 ---
 
 ## Project Planning
 
-Pendência — no documentation about:
+The repository does not include documentation describing:
 
-- initial planning
-- milestones
-- development timeline
+- Initial project planning
+- Milestones or timeline
+- Development workflow
 
 ---
 
 ## Retrospective
 
-Pendência — the following information is not available:
+The following elements are not documented in the repository:
 
-- what worked well during the project
-- what could be improved
-- tools used during development
+- What worked well during the project
+- What could be improved
+- Tools used during development
 
 ---
 
@@ -368,15 +375,14 @@ Classic references on maze generation and graph algorithms:
 - https://weblog.jamisbuck.org/2010/12/27/maze-generation-recursive-backtracking
 - Graph theory resources on spanning trees
 
-### AI Usage
+---
 
-AI tools were used for:
+# AI Usage
 
-- documentation drafting
-- structuring the README
-- formatting explanations
+AI tools were used to assist with:
+
+- Documentation drafting
+- Structuring the README
+- Formatting explanations
 
 All generated content was reviewed and validated before inclusion.
-- project planning timeline
-- retrospective analysis
-- confirmation of the exact maze generation algorithm

@@ -1,4 +1,4 @@
-*This project has been created as part of the 42 curriculum by <pdiniz-l>, <vzani-st>*
+*This project has been created as part of the 42 curriculum by <pdiniz-l>, <mabarret>*
 
 # A-Maze-ing
 
@@ -232,10 +232,9 @@ When the `PERFECT` flag is enabled, the maze must contain **exactly one valid pa
 
 The project includes a visual representation of the maze.
 
-The visualization can be implemented using:
+The visualization was implemented using:
 
-- Terminal ASCII rendering
-- A graphical interface using **MiniLibX (optional)**
+- ASCII rendering in the terminal
 
 The visual representation clearly shows:
 
@@ -246,10 +245,9 @@ The visual representation clearly shows:
 
 Possible interactions include:
 
-- Regenerating a new maze
+- Generating a new maze
 - Showing or hiding the shortest path
-- Changing wall colours
-- Optionally displaying the **“42” pattern** inside the maze
+- Changing wall colors
 
 ---
 
@@ -318,8 +316,7 @@ A-Maze-ING-main
 │   └── render
 │       ├── ascii_renderer.py
 │       └── palette.py
-│
-└── LICENSE
+
 ```
 
 ---
@@ -340,32 +337,43 @@ A-Maze-ING-main
 
 ## Roles
 
-The repository currently does not include documentation specifying:
+The project was developed by a team of two members, with the following responsibilities:
 
-- Team member roles
-- Task distribution during development
+* **pdiniz-l** – Implemented the maze generator module.
+* **mabarret** – Implemented the configuration system and user interaction features.
 
----
+The work was divided to separate the core maze generation logic from the user-facing controls and configuration.
+
 
 ## Project Planning
 
-The repository does not include documentation describing:
+Due to issues with the original team formations, both members initially developed separate implementations of the maze project.
 
-- Initial project planning
-- Milestones or timeline
-- Development workflow
+When forming the final team, the contributors decided to combine their individual work and knowledge into a unified codebase.
 
----
+Although developed independently at first, both implementations followed similar logic and algorithmic approaches for maze generation, which made it possible to merge and refactor the code into a consistent final project.
+
+The final repository represents the result of integrating these implementations and improving the overall structure of the project.
 
 ## Retrospective
 
-The following elements are not documented in the repository:
+### What worked well
 
-- What worked well during the project
-- What could be improved
-- Tools used during development
+- Reusing experience from previous individual implementations
 
----
+- Clear separation between generation logic and user interface
+
+- Incremental testing during integration
+
+- Modular structure that simplifies debugging and improvements
+
+### What could be improved
+
+- Earlier documentation of architectural decisions
+
+- Better planning and tracking of development stages
+
+- More detailed technical documentation during development
 
 # Resources
 

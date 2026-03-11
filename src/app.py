@@ -3,7 +3,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
-
 from .render.palette import palette_from_spec
 
 import mazegen
@@ -33,6 +32,8 @@ def run(app_cfg: AppConfig) -> RunResult:
 
     # Load maze configuration
     cfg = mazegen.MazeConfig.from_file(app_cfg.config_path)
+    if app_cfg.choice[1] % 2 == 1:
+        cfg.seed = cfg.seed + app_cfg.choice[1]
 
     # Generate maze
     generator = mazegen.MazeGenerator(cfg)
@@ -49,6 +50,14 @@ def run(app_cfg: AppConfig) -> RunResult:
     # Optional ASCII rendering
     if app_cfg.render_mode == RenderMode.ASCII:
         palette = palette_from_spec(cfg.colors)
+        if app_cfg.choice[3] % 2 == 1:
+            temp_color = palette.wall
+            palette.wall = palette.pattern_42
+            palette.pattern_42 = temp_color
+            temp_color = palette.entry
+            palette.entry = palette.path
+            palette.path = palette.exit
+            palette.exit = palette.pattern_42
 
         rendered = render_ascii(
             maze,

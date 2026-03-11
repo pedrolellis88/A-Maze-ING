@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">=3.10"
 authors = [
   { name = "Pedro Henrique Dinis Lellis" },
-  { name = "Vinicius Zani Stortti" }
+  { name = "Maria Barreto Miranda" }
 ]
 license = { text = "MIT" }
 keywords = ["maze", "generator", "42", "procedural"]

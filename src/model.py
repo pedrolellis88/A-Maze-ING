@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
 
@@ -23,3 +23,5 @@ class AppConfig:
     show_path: bool = False
 
     print_to_stdout: bool = True
+
+    choice: dict[int, int] = field(default_factory=lambda: {i: 0 for i in range(1, 4)}) # noqa

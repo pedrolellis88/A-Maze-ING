@@ -44,26 +44,76 @@ def main(argv: list[str] | None = None) -> int:
     config_path = Path(positional[0])
 
     try:
+        choice = {1: 0, 2: 0, 3: 0, 4: 0}
         app_cfg = AppConfig(
             config_path=config_path,
             render_mode=render_mode,
             show_path=show_path,
             print_to_stdout=True,
+            choice=choice,
         )
         run(app_cfg)
+        print(
+            """
+            == A-Maze-ing ==
+            1- Re-generate a new maze
+            2- Show/Hide path from entry to exit
+            3- Rotate maze colors
+            4- Quit
+            """
+        )
 
+        input_choice = int(input("Enter your choice (1-4): "))
+
+        while input_choice != 4:
+
+            if int(input_choice) in choice:
+                choice[int(input_choice)] += 1
+
+                if int(input_choice) == 2:
+                    show_path = not show_path
+
+                app_cfg = AppConfig(
+                    config_path=config_path,
+                    render_mode=render_mode,
+                    show_path=show_path,
+                    print_to_stdout=True,
+                    choice=choice,
+                    )
+
+                run(app_cfg)
+
+                print(
+                    """
+                    == A-Maze-ing ==
+                    1- Re-generate a new maze
+                    2- Show/Hide path from entry to exit
+                    3- Rotate maze colors
+                    4- Quit
+                    """
+                )
+            else:
+                print("Invalid choice. Should be 1, 2, 3 or 4.")
+            input_choice = int(input("Enter your choice (1-4): "))
+
+        print("Goodbye!")
+        return 0
+
+    except ValueError:
+        print("Error: input must be a digit between 1 and 4")
+        return 0
     except FileNotFoundError:
         print(f"Error: config file not found: {config_path}")
-        return 1
+        return 0
     except mazegen.MazeConfigError as exc:
         print(f"Error: invalid configuration: {exc}")
-        return 1
+        return 0
     except mazegen.MazeGenerationError as exc:
         print(f"Error: generation failed: {exc}")
-        return 1
+        return 0
     except Exception as exc:
         print(f"Error: unexpected failure: {exc}")
-        return 1
+        return 0
 
     return 0
 

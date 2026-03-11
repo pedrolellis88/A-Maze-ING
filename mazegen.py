@@ -324,10 +324,9 @@ class MazeGenerator:
                 for p in self._blocked:
                     _fully_close_cell_and_sync_neighbors(maze, p)
 
-        if self.cfg.perfect:
-            self._carve_perfect_backtracker(maze)
-        else:
-            raise MazeGenerationError("PERFECT=False not implemented yet")
+        self._carve_perfect_backtracker(maze)
+        if not self.cfg.perfect:
+            self._add_loops(maze, probability=0.1)
 
         self._maze = maze
         return maze
@@ -408,6 +407,24 @@ class MazeGenerator:
             raise MazeGenerationError(
                 "Generation failed: not all non-blocked cells are connected"
             )
+
+    def _add_loops(self, maze: Maze, probability: float = 0.1) -> None:
+        for y in range(maze.height):
+            for x in range(maze.width):
+
+                cur = Point(x, y)
+                if cur in self._blocked:
+                    continue
+
+                for d, np in _neighbors_in_bounds(maze, cur):
+
+                    if np in self._blocked:
+                        continue
+
+                    if has_wall(maze.cell(cur), d):
+
+                        if self.rng.random() < probability:
+                            _open_wall_between(maze, cur, d)
 
     def _open_between(self, maze: Maze, a: Point, d: Direction) -> bool:
         """Return True if there is a passage from a to its neighbor in direction d.""" # noqa
